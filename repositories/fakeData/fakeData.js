@@ -56,7 +56,7 @@ const createFakeAdmin = async () => {
 
 const createFakeStaff = async (adminId) => {
   try {
-    let adminProfile = await Profile.findWithId(adminId).exec();
+    let adminProfile = await Profile.findWithId(adminId);
     let adminListSub = await ArrayId.findById(adminProfile.listSubProfile);
     for (let i = 0; i < 2; i++) {
       let hashPassword = await bcrypt.hash(

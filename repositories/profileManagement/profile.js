@@ -10,7 +10,7 @@ const putEditProfile = async ({ id, name, email, address }) => {
   try {
     logi(TAG, "putEditProfile", { name, email, address });
     let objId = ObjectId(id);
-    let profileData = await Profile.findWithId(objId).exec();
+    let profileData = await Profile.findWithId(objId);
 
     let isModified = false;
     if (name !== undefined && profileData.name !== name) {
@@ -51,8 +51,11 @@ const getProfileData = async ({ id }) => {
   logi(TAG, "getProfileData", `${id}`);
   try {
     var objId = ObjectId(id);
-    const profileData = await Profile.findWithId(objId).exec();
+    logi(TAG, "getProfileData", objId);
+    const profileData = await Profile.findWithId(objId);
+    logi(TAG, "getProfileData", profileData);
     let returnProfile = { ...profileData._doc };
+    logi(TAG, "getProfileData", returnProfile);
     returnProfile.lastModified = await getShortProfile(
       profileData.lastModified.editedBy,
       profileData.lastModified.editedTime

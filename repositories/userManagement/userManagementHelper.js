@@ -27,10 +27,10 @@ const getListCustomerWithStaffId = async ({
       arrayIds = objectIds.map((obj) => ObjectId(obj._id.toString()));
     }
     if (staffId !== "" && staffId !== undefined) {
-      let staffProfile = await Profile.findWithId(staffId).exec();
+      let staffProfile = await Profile.findWithId(staffId);
       let listSubCustomer = await ArrayId.findWithId(
         staffProfile.listSubProfile
-      ).exec();
+      );
       arrayIds = listSubCustomer.ids;
     }
     let matchConditions = {
@@ -58,7 +58,7 @@ const getListCustomerWithStaffId = async ({
       { $match: matchConditions },
       { $skip: (page - 1) * size },
       { $limit: size },
-    ]).exec();
+    ]);
 
     return { resultSize: profiles.length, data: profiles };
   } catch (exception) {
@@ -81,7 +81,7 @@ const getListSub = async ({
       size,
     });
     // Find sub profile
-    const superProfile = await Profile.findWithId(accountJWT.profileId).exec();
+    const superProfile = await Profile.findWithId(accountJWT.profileId);
     const listIdSub = await ArrayId.findById(superProfile.listSubProfile);
     if (!listIdSub || listIdSub.ids.length === 0) {
       return { returnListUser: [], resultSize: 0 };
@@ -115,7 +115,7 @@ const getListSub = async ({
       },
       { $unwind: "$profileDetails" },
       { $replaceRoot: { newRoot: "$profileDetails" } },
-    ]).exec();
+    ]);
 
     return {
       resultSize: listSubResult.length,
@@ -129,7 +129,7 @@ const getListSub = async ({
 const getSubAccount = async ({ accountId }) => {
   try {
     logi(TAG, "getSubAccount", accountId);
-    const subAccount = await Account.findWithId(accountId).exec();
+    const subAccount = await Account.findWithId(accountId);
     let { password, ...returnAccount } = subAccount._doc;
     if (subAccount.lastModified) {
       returnAccount.lastModified = await getShortProfile(
@@ -153,7 +153,7 @@ const getSubAccount = async ({ accountId }) => {
 const getSubProfile = async ({ profileId }) => {
   try {
     logi(TAG, "getSubProfile", profileId);
-    const subProfile = await Profile.findWithId(profileId).exec();
+    const subProfile = await Profile.findWithId(profileId);
     let { ...returnProfile } = subProfile._doc;
     if (subProfile.lastModified) {
       returnProfile.lastModified = await getShortProfile(
@@ -180,7 +180,7 @@ const putSubAccount = async ({
       newPhoneNumber,
       newPassword,
     });
-    const subAccount = await Account.findWithId(accountId).exec();
+    const subAccount = await Account.findWithId(accountId);
     let isModified = false;
     if (
       newPassword !== undefined &&
@@ -201,10 +201,10 @@ const putSubAccount = async ({
     ) {
       await Account.checkPhoneNumberNotExist({
         phoneNumber: newPhoneNumber,
-      }).exec();
+      });
       subAccount.phoneNumber = newPhoneNumber;
       logi(TAG, "putSubAccount", subAccount.profileId);
-      let subProfile = await Profile.findWithId(subAccount.profileId).exec();
+      let subProfile = await Profile.findWithId(subAccount.profileId);
       logi(TAG, "putSubAccount", subProfile);
       subProfile.phoneNumber = newPhoneNumber;
       subProfile.lastModified.editedBy = accountJWT.profileId;
@@ -247,7 +247,7 @@ const putSubProfile = async ({
     address,
   });
   try {
-    const subProfile = await Profile.findWithId(profileId).exec();
+    const subProfile = await Profile.findWithId(profileId);
     let isModified = false;
     if (name !== undefined && subProfile.name !== name) {
       subProfile.name = name;
@@ -298,15 +298,13 @@ const postCreateNewUser = async ({
     });
     await Account.checkPhoneNumberNotExist({
       phoneNumber,
-    }).exec();
+    });
     const hashPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
     );
-    const superProfile = await Profile.findWithId(accountJWT.profileId).exec();
-    const superListSub = await ArrayId.findWithId(
-      superProfile.listSubProfile
-    ).exec();
+    const superProfile = await Profile.findWithId(accountJWT.profileId);
+    const superListSub = await ArrayId.findWithId(superProfile.listSubProfile);
 
     const newAccount = new Account({
       phoneNumber: phoneNumber,
@@ -399,14 +397,10 @@ const putAddCustomerToStaffSubId = async ({
     }
 
     // Find staff profile
-    const staffProfile = await Profile.findWithId(
-      ObjectId(staffProfileId)
-    ).exec();
+    const staffProfile = await Profile.findWithId(ObjectId(staffProfileId));
 
     // Find staff listSubProfile
-    let staffListSubId = await ArrayId.findById(
-      staffProfile.listSubProfile
-    ).exec();
+    let staffListSubId = await ArrayId.findById(staffProfile.listSubProfile);
 
     let isModified = false;
     // add id to listSubProfile
@@ -474,9 +468,7 @@ const putRemoveCustomerFromStaffSubId = async ({
       );
     }
 
-    const staffProfile = await Profile.findWithId(
-      ObjectId(staffProfileId)
-    ).exec();
+    const staffProfile = await Profile.findWithId(ObjectId(staffProfileId));
 
     if (!staffProfile) {
       throw new Exception(
@@ -487,9 +479,7 @@ const putRemoveCustomerFromStaffSubId = async ({
       );
     }
 
-    const staffListSubId = await ArrayId.findById(
-      staffProfile.listSubProfile
-    ).exec();
+    const staffListSubId = await ArrayId.findById(staffProfile.listSubProfile);
 
     let isModified = false;
     // Remove id in listRemoveSubId

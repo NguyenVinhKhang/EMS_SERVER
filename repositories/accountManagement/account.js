@@ -49,7 +49,7 @@ const logout = async ({ token }) => {
 const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
   logi(TAG, `register`, { password, phoneNumber, staffPhoneNumber, name });
   try {
-    await Account.checkPhoneNumberNotExist({ phoneNumber }).exec();
+    await Account.checkPhoneNumberNotExist({ phoneNumber });
     const hashPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
@@ -91,16 +91,16 @@ const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
     if (staffPhoneNumber && staffPhoneNumber !== "") {
       staff = await Profile.findByPhoneNumber({
         phoneNumber: staffPhoneNumber,
-      }).exec();
+      });
 
       let staffListSub = await ArrayId.findById({
         _id: staff.listSubProfile,
-      }).exec();
+      });
       staffListSub.ids.push(newCustomerProfile._id);
       await staffListSub.save();
       let customerListSup = await ArrayId.findById({
         _id: newCustomerProfile.listSuperProfile,
-      }).exec();
+      });
       customerListSup.ids.push(staff._id);
       await customerListSup.save();
     }
@@ -133,9 +133,7 @@ const putChangeAccountPassword = async ({
           parseInt(process.env.SALT_ROUNDS)
         );
         account.password = hashPassword;
-        const existingProfile = await Profile.findWithId(
-          accountJWT.profileId
-        ).exec();
+        const existingProfile = await Profile.findWithId(accountJWT.profileId);
         account.lastModified = {
           editedBy: existingProfile._id,
         };
@@ -184,9 +182,7 @@ const putChangeAccountPhoneNumber = async ({
           phoneNumber: newPhoneNumber1,
         });
         account.phoneNumber = newPhoneNumber1;
-        const existingProfile = await Profile.findWithId(
-          accountJWT.profileId
-        ).exec();
+        const existingProfile = await Profile.findWithId(accountJWT.profileId);
         account.lastModified = {
           editedBy: existingProfile._id,
         };

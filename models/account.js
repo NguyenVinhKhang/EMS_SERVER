@@ -32,7 +32,7 @@ const accountSchema = new Schema({
 });
 
 accountSchema.statics.findWithId = async function (id) {
-  let result = await this.findById(id).exec();
+  let result = await this.findById(id);
   if (!result) {
     throw new Exception(
       Exception.ACCOUNT_CANNOT_FIND_ID + id,
@@ -45,7 +45,7 @@ accountSchema.statics.findWithId = async function (id) {
 };
 
 accountSchema.statics.findByPhoneNumber = async function ({ phoneNumber }) {
-  let result = await this.findOne({ phoneNumber: phoneNumber }).exec();
+  let result = await this.findOne({ phoneNumber: phoneNumber });
   if (!result) {
     throw new Exception(
       Exception.ACCOUNT_CANNOT_FIND_PHONE_NUMBER + phoneNumber,
@@ -60,7 +60,7 @@ accountSchema.statics.findByPhoneNumber = async function ({ phoneNumber }) {
 accountSchema.statics.checkPhoneNumberNotExist = async function ({
   phoneNumber,
 }) {
-  let result = await this.findOne({ phoneNumber: phoneNumber }).exec();
+  let result = await this.findOne({ phoneNumber: phoneNumber });
   if (result) {
     throw new Exception(
       Exception.ACCOUNT_PHONE_NUMBER_EXIST + phoneNumber,

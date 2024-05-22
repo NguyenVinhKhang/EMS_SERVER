@@ -34,7 +34,8 @@ class Exception extends Error {
     "Cannot find profile with phone number: ";
 
   //Device
-  static DEVICE_NOT_FOUND = `Cannot find device with serial: `;
+  static DEVICE_NOT_FOUND_SERIAL = `Cannot find device with serial: `;
+  static DEVICE_NOT_FOUND_ID = `Cannot find device with id: `;
   static DEVICE_EXIST = `Device already exists`;
 
   //Nhóm khác

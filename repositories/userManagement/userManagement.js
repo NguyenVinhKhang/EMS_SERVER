@@ -227,11 +227,9 @@ const getCustomerAccount = async ({ accountJWT, accountId }) => {
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
-      let staffSubList = await arrayId
-        .findById(staffProfile.listSubProfile)
-        .exec();
-      let customerAccount = await Account.findWithId(accountId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId);
+      let staffSubList = await arrayId.findById(staffProfile.listSubProfile);
+      let customerAccount = await Account.findWithId(accountId);
       if (!staffSubList.includes(customerAccount.profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,
@@ -256,10 +254,8 @@ const getCustomerProfile = async ({ accountJWT, profileId }) => {
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
-      let staffSubList = await arrayId
-        .findById(staffProfile.listSubProfile)
-        .exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId);
+      let staffSubList = await arrayId.findById(staffProfile.listSubProfile);
       if (!staffSubList.includes(profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,
@@ -291,11 +287,9 @@ const putCustomerAccount = async ({
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
-      let staffSubList = await arrayId
-        .findById(staffProfile.listSubProfile)
-        .exec();
-      let customerAccount = await Account.findWithId(accountId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId);
+      let staffSubList = await arrayId.findById(staffProfile.listSubProfile);
+      let customerAccount = await Account.findWithId(accountId);
       if (!staffSubList.includes(customerAccount.profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,
@@ -334,10 +328,8 @@ const putCustomerProfile = async ({
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
-      let staffSubList = await arrayId
-        .findById(staffProfile.listSubProfile)
-        .exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId);
+      let staffSubList = await arrayId.findById(staffProfile.listSubProfile);
       if (!staffSubList.includes(profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,

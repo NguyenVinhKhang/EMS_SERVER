@@ -4,6 +4,7 @@ import isEmail from "validator/lib/isEmail.js";
 
 import HTTPCode from "../exception/HTTPStatusCode.js";
 import Exception from "../exception/Exception.js";
+import { logi } from "../helpers/log.js";
 
 const TAG = "PROFILE_MODEL";
 const profileSchema = new Schema({
@@ -53,14 +54,17 @@ profileSchema.statics.findByIdAndThrowIfNotFound = async function (
   exceptionMessage,
   func
 ) {
-  let result = await this.findById(id).exec();
+  logi(TAG, "findByIdAndThrowIfNotFound", `${id}`);
+  let result = await this.findById(id);
   if (!result) {
     throw new Exception(exceptionMessage + id, TAG, func, HTTPCode.BAD_REQUEST);
   }
+  logi(TAG, "findByIdAndThrowIfNotFound", result);
   return result;
 };
 
 profileSchema.statics.findWithId = async function (id) {
+  logi(TAG, "findWithId", `${id}`);
   return this.findByIdAndThrowIfNotFound(
     id,
     Exception.PROFILE_DATA_NOT_EXIST,
@@ -85,7 +89,7 @@ profileSchema.statics.findCustomerWithId = async function (id) {
 };
 
 profileSchema.statics.findByPhoneNumber = async function ({ phoneNumber }) {
-  let result = await this.findOne({ phoneNumber: phoneNumber }).exec();
+  let result = await this.findOne({ phoneNumber: phoneNumber });
   if (!result) {
     throw new Exception(
       Exception.PROFILE_CANNOT_FIND_PHONE_NUMBER + phoneNumber,
