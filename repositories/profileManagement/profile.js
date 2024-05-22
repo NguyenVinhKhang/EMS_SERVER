@@ -3,14 +3,14 @@ import Exception from "../../exception/Exception.js";
 import HTTPCode from "../../exception/HTTPStatusCode.js";
 import { logi } from "../../helpers/log.js";
 import { Profile } from "../../models/index.js";
-import { getShortProfile } from "../../helpers/getShortProfile.js";
+import { getShortProfile } from "./profileHelper.js";
 const TAG = "ProfileRepository";
 
 const putEditProfile = async ({ id, name, email, address }) => {
   try {
     logi(TAG, "putEditProfile", { name, email, address });
     let objId = ObjectId(id);
-    let profileData = await Profile.findOne({ _id: objId }).exec();
+    let profileData = await Profile.findWithId(objId).exec();
 
     let isModified = false;
     if (name !== undefined && profileData.name !== name) {
@@ -36,18 +36,14 @@ const putEditProfile = async ({ id, name, email, address }) => {
 
     let returnProfile = { ...profileData._doc };
     if (profileData.lastModified) {
-      let lastModifiedProfile = await Profile.findById(
-        profileData.lastModified.editedBy
+      returnProfile.lastModified = await getShortProfile(
+        profileData.lastModified.editedBy,
+        profileData.lastModified.editedTime
       );
-      returnProfile.lastModified = {
-        name: lastModifiedProfile.name,
-        role: lastModifiedProfile.role,
-        date: profileData.lastModified.editedTime,
-      };
     }
     return returnProfile;
   } catch (exception) {
-    throw new Exception(exception, TAG, "putEditProfile", HTTPCode.INSERT_FAIL);
+    await handleException(exception, TAG, "putEditProfile");
   }
 };
 
@@ -55,17 +51,7 @@ const getProfileData = async ({ id }) => {
   logi(TAG, "getProfileData", `${id}`);
   try {
     var objId = ObjectId(id);
-    const profileData = await Profile.findOne({ _id: objId }).exec();
-    logi(TAG, "profileData", profileData);
-    if (!profileData) {
-      throw new Exception(
-        Exception.PROFILE_DATA_NOT_EXIST,
-        TAG,
-        HTTPCode.BAD_REQUEST,
-        "getProfileData"
-      );
-    }
-
+    const profileData = await Profile.findWithId(objId).exec();
     let returnProfile = { ...profileData._doc };
     returnProfile.lastModified = await getShortProfile(
       profileData.lastModified.editedBy,
@@ -73,16 +59,7 @@ const getProfileData = async ({ id }) => {
     );
     return returnProfile;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        HTTPCode.BAD_REQUEST,
-        "getProfileData"
-      );
-    }
+    await handleException(exception, TAG, "getProfileData");
   }
 };
 

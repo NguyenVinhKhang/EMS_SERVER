@@ -1,6 +1,7 @@
 import { loge } from "../helpers/log.js";
+import HTTPCode from "./HTTPStatusCode.js";
 
-export default class Exception extends Error {
+class Exception extends Error {
   //chung
   static MISSING_PARAMETER = "Missing ";
 
@@ -10,13 +11,12 @@ export default class Exception extends Error {
   static DB_CANNOT_CONNECT_MONGODB = "Cannot connect to MongoDB";
 
   // Nhóm "account"
-  static ACCOUNT_DATA_NOT_EXIST = "Account data does not exist ";
-  static ACCOUNT_PHONE_NUMBER_EXIST = "Phone number already exists";
-  static ACCOUNT_PHONE_NUMBER_NOT_EXIST = "Phone number does not exist";
+  static ACCOUNT_CANNOT_FIND_ID = "Cannot find account with id: ";
+  static ACCOUNT_CANNOT_FIND_PHONE_NUMBER =
+    "Cannot find account with phone number: ";
+  static ACCOUNT_PHONE_NUMBER_EXIST = "Phone number already exists: ";
   static ACCOUNT_PASSWORD_INVALID = "Password is invalid";
-  static ACCOUNT_WRONG_USERNAME_OR_PASSWORD = "Wrong username or password";
   static STAFF_IS_NOT_EXIST = "Staff does not exist";
-  static INPUT_FAIL = "Input fail";
   static ACCOUNT_OLD_PASSWORD_INCORRECT = "Old password is incorrect";
   static ACCOUNT_NEW_PASSWORD_NOT_MATCH =
     "New password does not match each other";
@@ -25,11 +25,16 @@ export default class Exception extends Error {
   static ACCOUNT_ACCESS_DENIED = "Access denied";
 
   // Nhóm "profile"
-  static PROFILE_EMAIL_EXIST = "Email already exists";
+  static PROFILE_CANNOT_FIND_ID = "Cannot find account with id: ";
   static PROFILE_DATA_NOT_EXIST = "Profile data does not exist ";
+  static PROFILE_STAFF_NOT_EXIST = "Staff profile does not exist with id: ";
+  static PROFILE_CUSTOMER_NOT_EXIST =
+    "Customer profile does not exist with id:";
+  static PROFILE_CANNOT_FIND_PHONE_NUMBER =
+    "Cannot find profile with phone number: ";
 
   //Device
-  static DEVICE_NOT_FOUND = `Cannot find device with serial `;
+  static DEVICE_NOT_FOUND = `Cannot find device with serial: `;
   static DEVICE_EXIST = `Device already exists`;
 
   //Nhóm khác
@@ -39,7 +44,21 @@ export default class Exception extends Error {
   constructor(message, tag, func, statusCode, validationErrors = {}) {
     super(message);
     loge(tag, func, message);
-    this.statusCode = statusCode;
-    this.validationErrors = validationErrors;
+    if (statusCode) {
+      this.statusCode = statusCode;
+    }
+    if (validationErrors) {
+      this.validationErrors = validationErrors;
+    }
   }
 }
+
+const handleException = async (exception, tag, func) => {
+  if (exception instanceof Exception) {
+    throw exception;
+  } else {
+    throw new Exception(exception, tag, func, HTTPCode.INTERNAL_SERVER_ERROR);
+  }
+};
+export default Exception;
+export { handleException };

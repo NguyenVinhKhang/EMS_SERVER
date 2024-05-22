@@ -30,7 +30,6 @@ const createFakeAdmin = async () => {
     };
 
     const newAdminProfile = await Profile.create(fakeAdminProfile);
-
     (newAdminAccount.profileId = newAdminProfile._id),
       (newAdminAccount.lastModified = {
         editedBy: newAdminProfile._id,
@@ -51,21 +50,14 @@ const createFakeAdmin = async () => {
     await newAdminProfile.save();
     return newAdminProfile._id;
   } catch (exception) {
-    throw new Exception(
-      exception,
-      TAG,
-      "CREATE ADMIN",
-      HTTPCode.INTERNAL_SERVER_ERROR
-    );
+    await handleException(exception, "CREATE ADMIN", "createFakeAdmin");
   }
 };
 
 const createFakeStaff = async (adminId) => {
   try {
-    let adminProfile = await Profile.findOne({ _id: adminId });
-    let adminListSub = await ArrayId.findOne({
-      listSubProfile: adminProfile.listSubProfile,
-    });
+    let adminProfile = await Profile.findWithId(adminId).exec();
+    let adminListSub = await ArrayId.findById(adminProfile.listSubProfile);
     for (let i = 0; i < 2; i++) {
       let hashPassword = await bcrypt.hash(
         "staff123",
@@ -120,12 +112,7 @@ const createFakeStaff = async (adminId) => {
       await adminListSub.save();
     }
   } catch (exception) {
-    throw new Exception(
-      exception,
-      TAG,
-      "CREATE STAFF",
-      HTTPCode.INTERNAL_SERVER_ERROR
-    );
+    await handleException(exception, "CREATE STAFF", "createFakeStaff");
   }
 };
 
@@ -153,11 +140,10 @@ async function generateFakeAccount(req, res) {
     if (exception instanceof Exception) {
       throw exception;
     } else {
-      throw new Exception(
+      await handleException(
         exception,
-        TAG,
-        "Generate Fake Account",
-        HTTPCode.INTERNAL_SERVER_ERROR
+        "CREATE CUSTOMER",
+        "generateFakeAccount"
       );
     }
   }

@@ -1,5 +1,5 @@
 import { tokenMap } from "../../authentication/tokenMap.js";
-import Exception from "../../exception/Exception.js";
+import Exception, { handleException } from "../../exception/Exception.js";
 import HTTPCode from "../../exception/HTTPStatusCode.js";
 import { logi } from "../../helpers/log.js";
 import { Account, ArrayId, Profile } from "../../models/index.js";
@@ -10,22 +10,14 @@ const TAG = "accountManagementRepository";
 
 const login = async ({ phoneNumber, passwordInput }) => {
   try {
-    let account = await Account.findOne({ phoneNumber }).exec();
-    if (!account) {
-      throw new Exception(
-        Exception.ACCOUNT_PHONE_NUMBER_NOT_EXIST,
-        TAG,
-        "login",
-        HTTPCode.NOT_FOUND
-      );
-    }
+    let account = await Account.findByPhoneNumber({ phoneNumber });
     logi(TAG, "Login", account);
     let isMatch = await bcrypt.compare(passwordInput, account.password);
     if (!isMatch) {
       throw new Exception(
         Exception.ACCOUNT_PASSWORD_INVALID,
         TAG,
-        "Login",
+        "login",
         HTTPCode.BAD_REQUEST
       );
     }
@@ -41,16 +33,7 @@ const login = async ({ phoneNumber, passwordInput }) => {
       token: token,
     };
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "login",
-        HTTPCode.INTERNAL_SERVER_ERROR
-      );
-    }
+    await handleException(exception, TAG, "login");
   }
 };
 
@@ -59,23 +42,14 @@ const logout = async ({ token }) => {
     tokenMap.remove(token);
     return "Logout successfully";
   } catch (exception) {
-    throw new Exception(exception, TAG, "logout", HTTPCode.BAD_REQUEST);
+    await handleException(exception, TAG, "logout");
   }
 };
 
 const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
   logi(TAG, `register`, { password, phoneNumber, staffPhoneNumber, name });
   try {
-    const existingAccount = await Account.findOne({ phoneNumber }).exec();
-    if (existingAccount) {
-      throw new Exception(
-        Exception.ACCOUNT_PHONE_NUMBER_EXIST,
-        TAG,
-        "register",
-        HTTPCode.INSERT_FAIL
-      );
-    }
-
+    await Account.checkPhoneNumberNotExist({ phoneNumber }).exec();
     const hashPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
@@ -115,18 +89,10 @@ const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
     let staff;
     await newCustomerProfile.save();
     if (staffPhoneNumber && staffPhoneNumber !== "") {
-      staff = await Profile.findOne({
+      staff = await Profile.findByPhoneNumber({
         phoneNumber: staffPhoneNumber,
-        role: "staff",
       }).exec();
-      if (!staff) {
-        throw new Exception(
-          Exception.STAFF_IS_NOT_EXIST,
-          TAG,
-          "register",
-          HTTPCode.INSERT_FAIL
-        );
-      }
+
       let staffListSub = await ArrayId.findById({
         _id: staff.listSubProfile,
       }).exec();
@@ -142,11 +108,7 @@ const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
     logi(TAG, `register`, "Registration successful");
     return "Registration successful";
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(exception, TAG, "register", HTTPCode.INSERT_FAIL);
-    }
+    await handleException(exception, TAG, "register");
   }
 };
 
@@ -163,14 +125,7 @@ const putChangeAccountPassword = async ({
       newPassword1,
       newPassword2,
     });
-    const account = await Account.findById(accountJWT._id);
-    if (!account) {
-      throw new Exception(
-        Exception.ACCOUNT_DATA_NOT_EXIST,
-        TAG,
-        "putChangeAccountPassword"
-      );
-    }
+    const account = await Account.findWithId(accountJWT._id);
     if (await bcrypt.compare(oldPassword, account.password)) {
       if (newPassword1 === newPassword2) {
         const hashPassword = await bcrypt.hash(
@@ -178,16 +133,9 @@ const putChangeAccountPassword = async ({
           parseInt(process.env.SALT_ROUNDS)
         );
         account.password = hashPassword;
-        const existingProfile = await Profile.findById(
+        const existingProfile = await Profile.findWithId(
           accountJWT.profileId
         ).exec();
-        if (!existingProfile) {
-          throw new Exception(
-            Exception.PROFILE_DATA_NOT_EXIST + accountJWT.profileId,
-            TAG,
-            "putChangeAccountPassword"
-          );
-        }
         account.lastModified = {
           editedBy: existingProfile._id,
         };
@@ -212,16 +160,7 @@ const putChangeAccountPassword = async ({
     }
     return "Change password successfully";
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putChangeAccountPassword",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    await handleException(exception, TAG, "putChangeAccountPassword");
   }
 };
 
@@ -238,37 +177,16 @@ const putChangeAccountPhoneNumber = async ({
       newPhoneNumber1,
       newPhoneNumber2,
     });
-    const account = await Account.findById(accountJWT._id);
-    if (!account) {
-      throw new Exception(
-        Exception.ACCOUNT_DATA_NOT_EXIST,
-        TAG,
-        "putChangeAccountPassword",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    const account = await Account.findWithId(accountJWT._id);
     if (await bcrypt.compare(password, account.password)) {
       if ((newPhoneNumber1 = newPhoneNumber2)) {
-        const existingAccount = await Account.findOne({
+        await Account.checkPhoneNumberNotExist({
           phoneNumber: newPhoneNumber1,
         });
-        if (existingAccount) {
-          throw new Exception(
-            Exception.ACCOUNT_PHONE_NUMBER_EXIST,
-            TAG,
-            "putChangeAccountPhoneNumber",
-            HTTPCode.INSERT_FAIL
-          );
-        }
         account.phoneNumber = newPhoneNumber1;
-        const existingProfile = await Profile.findById(accountJWT.profileId);
-        if (!existingProfile) {
-          throw new Exception(
-            Exception.PROFILE_DATA_NOT_EXIST + accountJWT.profileId,
-            TAG,
-            "putChangeAccountPassword"
-          );
-        }
+        const existingProfile = await Profile.findWithId(
+          accountJWT.profileId
+        ).exec();
         account.lastModified = {
           editedBy: existingProfile._id,
         };
@@ -297,16 +215,7 @@ const putChangeAccountPhoneNumber = async ({
     }
     return "Change phone number successfully";
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putChangeAccountPassword",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    await handleException(exception, TAG, "putChangeAccountPhoneNumber");
   }
 };
 

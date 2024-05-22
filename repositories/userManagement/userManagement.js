@@ -29,16 +29,7 @@ const getListStaff = async ({ accountJWT, searchString, page, size }) => {
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getListStaff",
-        HTTPCode.INTERNAL_SERVER_ERROR
-      );
-    }
+    await handleException(exception, TAG, "getListStaff");
   }
 };
 
@@ -52,16 +43,7 @@ const getStaffAccount = async ({ accountJWT, accountId }) => {
     let result = await UserManagementHelper.getSubAccount({ accountId });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getStaffAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getStaffAccount");
   }
 };
 
@@ -75,16 +57,7 @@ const getStaffProfile = async ({ accountJWT, profileId }) => {
     let result = await UserManagementHelper.getSubProfile({ profileId });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getStaffProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getStaffProfile");
   }
 };
 
@@ -110,16 +83,7 @@ const putStaffAccount = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putStaffAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putStaffAccount");
   }
 };
 
@@ -148,16 +112,7 @@ const putStaffProfile = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putStaffProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putStaffProfile");
   }
 };
 
@@ -184,16 +139,7 @@ const postCreateNewStaff = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "postCreateNewStaff",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "postCreateNewStaff");
   }
 };
 
@@ -216,16 +162,7 @@ const putRemoveCustomerFromStaffSubId = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putRemoveCustomerFromStaffSubId",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putRemoveCustomerFromStaffSubId");
   }
 };
 
@@ -248,16 +185,7 @@ const putAddCustomerToStaffSubId = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putAddCustomerToStaffSubId",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putAddCustomerToStaffSubId");
   }
 };
 
@@ -287,16 +215,7 @@ const getCustomerList = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getCustomerList",
-        HTTPCode.INTERNAL_SERVER_ERROR
-      );
-    }
+    await handleException(exception, TAG, "getCustomerList");
   }
 };
 
@@ -308,11 +227,11 @@ const getCustomerAccount = async ({ accountJWT, accountId }) => {
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findById(accountJWT.profileId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
       let staffSubList = await arrayId
         .findById(staffProfile.listSubProfile)
         .exec();
-      let customerAccount = await Account.findById(accountId).exec();
+      let customerAccount = await Account.findWithId(accountId).exec();
       if (!staffSubList.includes(customerAccount.profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,
@@ -325,16 +244,7 @@ const getCustomerAccount = async ({ accountJWT, accountId }) => {
     let result = UserManagementHelper.getSubAccount({ accountId });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getCustomerAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getCustomerAccount");
   }
 };
 
@@ -346,7 +256,7 @@ const getCustomerProfile = async ({ accountJWT, profileId }) => {
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findById(accountJWT.profileId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
       let staffSubList = await arrayId
         .findById(staffProfile.listSubProfile)
         .exec();
@@ -362,16 +272,7 @@ const getCustomerProfile = async ({ accountJWT, profileId }) => {
     let result = UserManagementHelper.getSubProfile({ profileId });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getCustomerProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getCustomerProfile");
   }
 };
 
@@ -390,11 +291,11 @@ const putCustomerAccount = async ({
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findById(accountJWT.profileId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
       let staffSubList = await arrayId
         .findById(staffProfile.listSubProfile)
         .exec();
-      let customerAccount = await Account.findById(accountId).exec();
+      let customerAccount = await Account.findWithId(accountId).exec();
       if (!staffSubList.includes(customerAccount.profileId)) {
         throw new Exception(
           Exception.ACCOUNT_ACCESS_DENIED,
@@ -412,16 +313,7 @@ const putCustomerAccount = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putCustomerAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putCustomerAccount");
   }
 };
 
@@ -442,7 +334,7 @@ const putCustomerProfile = async ({
     });
     await checkStaffRight(accountJWT.role);
     if (accountJWT.role === "staff") {
-      let staffProfile = await Profile.findById(accountJWT.profileId).exec();
+      let staffProfile = await Profile.findWithId(accountJWT.profileId).exec();
       let staffSubList = await arrayId
         .findById(staffProfile.listSubProfile)
         .exec();
@@ -464,16 +356,7 @@ const putCustomerProfile = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putCustomerProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "putCustomerProfile");
   }
 };
 
@@ -500,16 +383,7 @@ const postCreateNewCustomer = async ({
     });
     return result;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "postCreateNewCustomer",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "postCreateNewCustomer");
   }
 };
 export default {

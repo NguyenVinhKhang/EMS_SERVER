@@ -4,7 +4,7 @@ import HTTPCode from "../../exception/HTTPStatusCode.js";
 import { logi } from "../../helpers/log.js";
 import { Account, ArrayId, Profile } from "../../models/index.js";
 import bcrypt from "bcrypt";
-import { getShortProfile } from "../../helpers/getShortProfile.js";
+import { getShortProfile } from "../profileManagement/profileHelper.js";
 
 const TAG = "UserManagementRepository";
 
@@ -27,16 +27,8 @@ const getListCustomerWithStaffId = async ({
       arrayIds = objectIds.map((obj) => ObjectId(obj._id.toString()));
     }
     if (staffId !== "" && staffId !== undefined) {
-      let staffProfile = await Profile.findById(staffId).exec();
-      if (!staffProfile) {
-        throw new Exception(
-          Exception.PROFILE_DATA_NOT_EXIST + staffId,
-          TAG,
-          "getListCustomerWithStaffId",
-          HTTPCode.BAD_REQUEST
-        );
-      }
-      let listSubCustomer = await ArrayId.findById(
+      let staffProfile = await Profile.findWithId(staffId).exec();
+      let listSubCustomer = await ArrayId.findWithId(
         staffProfile.listSubProfile
       ).exec();
       arrayIds = listSubCustomer.ids;
@@ -70,12 +62,7 @@ const getListCustomerWithStaffId = async ({
 
     return { resultSize: profiles.length, data: profiles };
   } catch (exception) {
-    throw new Exception(
-      `${exception}`,
-      TAG,
-      "getListCustomerWithStaffId",
-      HTTPCode.BAD_REQUEST
-    );
+    await handleException(exception, TAG, "getListCustomerWithStaffId");
   }
 };
 
@@ -94,15 +81,7 @@ const getListSub = async ({
       size,
     });
     // Find sub profile
-    const superProfile = await Profile.findById(accountJWT.profileId).exec();
-    if (!superProfile) {
-      throw new Exception(
-        Exception.PROFILE_DATA_NOT_EXIST,
-        TAG,
-        "getListSub",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    const superProfile = await Profile.findWithId(accountJWT.profileId).exec();
     const listIdSub = await ArrayId.findById(superProfile.listSubProfile);
     if (!listIdSub || listIdSub.ids.length === 0) {
       return { returnListUser: [], resultSize: 0 };
@@ -143,22 +122,14 @@ const getListSub = async ({
       result: listSubResult,
     };
   } catch (exception) {
-    throw new Exception(exception, TAG, "getListSub", HTTPCode.BAD_REQUEST);
+    await handleException(exception, TAG, "getListSub");
   }
 };
 
 const getSubAccount = async ({ accountId }) => {
   try {
     logi(TAG, "getSubAccount", accountId);
-    const subAccount = await Account.findById(accountId).exec();
-    if (!subAccount) {
-      throw new Exception(
-        Exception.ACCOUNT_DATA_NOT_EXIST,
-        TAG,
-        "getSubAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    const subAccount = await Account.findWithId(accountId).exec();
     let { password, ...returnAccount } = subAccount._doc;
     if (subAccount.lastModified) {
       returnAccount.lastModified = await getShortProfile(
@@ -175,31 +146,14 @@ const getSubAccount = async ({ accountId }) => {
 
     return returnAccount;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getSubAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getSubAccount");
   }
 };
 
 const getSubProfile = async ({ profileId }) => {
   try {
     logi(TAG, "getSubProfile", profileId);
-    const subProfile = await Profile.findById(profileId).exec();
-    if (!subProfile) {
-      throw new Exception(
-        Exception.PROFILE_DATA_NOT_EXIST,
-        TAG,
-        "getSubProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    const subProfile = await Profile.findWithId(profileId).exec();
     let { ...returnProfile } = subProfile._doc;
     if (subProfile.lastModified) {
       returnProfile.lastModified = await getShortProfile(
@@ -209,16 +163,7 @@ const getSubProfile = async ({ profileId }) => {
     }
     return returnProfile;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "getSubProfile",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    await handleException(exception, TAG, "getSubProfile");
   }
 };
 
@@ -235,15 +180,7 @@ const putSubAccount = async ({
       newPhoneNumber,
       newPassword,
     });
-    const subAccount = await Account.findById(accountId).exec();
-    if (!subAccount) {
-      throw new Exception(
-        Exception.ACCOUNT_DATA_NOT_EXIST,
-        TAG,
-        "putSubAccount",
-        HTTPCode.BAD_REQUEST
-      );
-    }
+    const subAccount = await Account.findWithId(accountId).exec();
     let isModified = false;
     if (
       newPassword !== undefined &&
@@ -262,20 +199,12 @@ const putSubAccount = async ({
       newPhoneNumber !== "" &&
       newPhoneNumber !== subAccount.phoneNumber
     ) {
-      let existPhoneNumber = await Account.findOne({
+      await Account.checkPhoneNumberNotExist({
         phoneNumber: newPhoneNumber,
       }).exec();
-      if (existPhoneNumber) {
-        throw new Exception(
-          Exception.ACCOUNT_PHONE_NUMBER_EXIST,
-          TAG,
-          "putStaffAccount",
-          HTTPCode.BAD_REQUEST
-        );
-      }
       subAccount.phoneNumber = newPhoneNumber;
       logi(TAG, "putSubAccount", subAccount.profileId);
-      let subProfile = await Profile.findById(subAccount.profileId).exec();
+      let subProfile = await Profile.findWithId(subAccount.profileId).exec();
       logi(TAG, "putSubAccount", subProfile);
       subProfile.phoneNumber = newPhoneNumber;
       subProfile.lastModified.editedBy = accountJWT.profileId;
@@ -299,16 +228,7 @@ const putSubAccount = async ({
     );
     return returnAccount;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putSubAccount",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    await handleException(exception, TAG, "putSubAccount");
   }
 };
 
@@ -327,15 +247,7 @@ const putSubProfile = async ({
     address,
   });
   try {
-    const subProfile = await Profile.findById(profileId).exec();
-    if (!subProfile) {
-      throw new Exception(
-        Exception.PROFILE_DATA_NOT_EXIST,
-        TAG,
-        "putSubProfile",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    const subProfile = await Profile.findWithId(profileId).exec();
     let isModified = false;
     if (name !== undefined && subProfile.name !== name) {
       subProfile.name = name;
@@ -365,16 +277,7 @@ const putSubProfile = async ({
     }
     return returnProfile;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "putSubProfile",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    await handleException(exception, TAG, "putSubProfile");
   }
 };
 
@@ -393,24 +296,15 @@ const postCreateNewUser = async ({
       name,
       role,
     });
-    const existingAccount = await Account.findOne({
+    await Account.checkPhoneNumberNotExist({
       phoneNumber,
     }).exec();
-
-    if (existingAccount) {
-      throw new Exception(
-        Exception.ACCOUNT_PHONE_NUMBER_EXIST,
-        TAG,
-        "postCreateNewUser",
-        HTTPCode.INSERT_FAIL
-      );
-    }
     const hashPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
     );
-    const superProfile = await Profile.findById(accountJWT.profileId).exec();
-    const superListSub = await ArrayId.findById(
+    const superProfile = await Profile.findWithId(accountJWT.profileId).exec();
+    const superListSub = await ArrayId.findWithId(
       superProfile.listSubProfile
     ).exec();
 
@@ -480,16 +374,7 @@ const postCreateNewUser = async ({
 
     return returnAccount;
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        exception,
-        TAG,
-        "postCreateNewUser",
-        HTTPCode.INSERT_FAIL
-      );
-    }
+    await handleException(exception, TAG, "postCreateNewUser");
   }
 };
 
@@ -514,18 +399,9 @@ const putAddCustomerToStaffSubId = async ({
     }
 
     // Find staff profile
-    const staffProfile = await Profile.findById(
+    const staffProfile = await Profile.findWithId(
       ObjectId(staffProfileId)
     ).exec();
-
-    if (!staffProfile) {
-      throw new Exception(
-        Exception.PROFILE_DATA_NOT_EXIST + staffProfileId,
-        TAG,
-        "putAddCustomerToStaffSubId",
-        HTTPCode.BAD_REQUEST
-      );
-    }
 
     // Find staff listSubProfile
     let staffListSubId = await ArrayId.findById(
@@ -537,15 +413,7 @@ const putAddCustomerToStaffSubId = async ({
     if (listNewSubId.length > 0) {
       for (const element of listNewSubId) {
         const elementId = ObjectId(element);
-        const existCustomer = await Profile.findById(elementId);
-        if (!existCustomer) {
-          throw new Exception(
-            Exception.PROFILE_DATA_NOT_EXIST + `:${elementId}`,
-            TAG,
-            "putAddCustomerToStaffSubId",
-            HTTPCode.BAD_REQUEST
-          );
-        }
+        const existCustomer = await Profile.findWithId(elementId);
         const listCustomerSuperProfile = await ArrayId.findById(
           existCustomer.listSuperProfile
         );
@@ -581,16 +449,7 @@ const putAddCustomerToStaffSubId = async ({
       }
     }
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        Exception.INTERNAL_SERVER_ERROR,
-        TAG,
-        "putAddCustomerToStaffSubId",
-        HTTPCode.INTERNAL_SERVER_ERROR
-      );
-    }
+    await handleException(exception, TAG, "putAddCustomerToStaffSubId");
   }
 };
 
@@ -615,7 +474,7 @@ const putRemoveCustomerFromStaffSubId = async ({
       );
     }
 
-    const staffProfile = await Profile.findById(
+    const staffProfile = await Profile.findWithId(
       ObjectId(staffProfileId)
     ).exec();
 
@@ -637,15 +496,7 @@ const putRemoveCustomerFromStaffSubId = async ({
     if (listRemoveSubId.length > 0) {
       for (const element of listRemoveSubId) {
         const elementId = ObjectId(element);
-        const existCustomer = await Profile.findById(elementId);
-        if (!existCustomer) {
-          throw new Exception(
-            Exception.PROFILE_DATA_NOT_EXIST + `:${elementId}`,
-            TAG,
-            "putAddCustomerToStaffSubId",
-            HTTPCode.BAD_REQUEST
-          );
-        }
+        const existCustomer = await Profile.findWithId(elementId);
         const listCustomerSuperProfile = await ArrayId.findById(
           existCustomer.listSuperProfile
         );
@@ -680,16 +531,7 @@ const putRemoveCustomerFromStaffSubId = async ({
     }
     return "Remove success";
   } catch (exception) {
-    if (exception instanceof Exception) {
-      throw exception;
-    } else {
-      throw new Exception(
-        Exception.INTERNAL_SERVER_ERROR,
-        TAG,
-        "putRemoveCustomerFromStaffSubId",
-        HTTPCode.INTERNAL_SERVER_ERROR
-      );
-    }
+    await handleException(exception, TAG, "putRemoveCustomerFromStaffSubId");
   }
 };
 
