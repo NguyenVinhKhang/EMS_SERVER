@@ -1,5 +1,4 @@
-import Exception from "../../exception/Exception.js";
-import HTTPCode from "../../exception/HTTPStatusCode.js";
+import { handleException } from "../../exception/Exception.js";
 import { Profile } from "../../models/index.js";
 
 async function getShortProfile(profileId, editedTime) {
@@ -8,6 +7,7 @@ async function getShortProfile(profileId, editedTime) {
     let returnProfile = {
       name: shortProfile.name,
       role: shortProfile.role,
+      phoneNumber: shortProfile.phoneNumber,
     };
     if (editedTime) {
       returnProfile.date = editedTime;

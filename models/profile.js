@@ -1,10 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { actionRecord } from "./actionRecord.js";
 import isEmail from "validator/lib/isEmail.js";
-
+import { ObjectId } from "mongodb";
 import HTTPCode from "../exception/HTTPStatusCode.js";
 import Exception from "../exception/Exception.js";
-import { logi } from "../helpers/log.js";
+import { loge, logi } from "../helpers/log.js";
 
 const TAG = "PROFILE_MODEL";
 const profileSchema = new Schema({
@@ -47,6 +47,45 @@ const profileSchema = new Schema({
   listSubProfile: { type: Schema.Types.ObjectId },
   listSuperProfile: { type: Schema.Types.ObjectId },
   listDevice: { type: Schema.Types.ObjectId },
+  listDeviceFollowing: { type: Schema.Types.ObjectId },
+});
+
+profileSchema.pre("validate", async function (next) {
+  logi(TAG, "validate", "createNewId");
+  if (this.isNew) {
+    const ArrayId = mongoose.model("arrayId");
+    try {
+      // Create and save arrayId documents based on role
+      if (this.role === "customer") {
+        const superProfileArray = await new ArrayId().save();
+        this.listSuperProfile = superProfileArray._id;
+        const listDevice = await new ArrayId().save();
+        this.listDevice = listDevice._id;
+        const listDeviceFollowing = await new ArrayId().save();
+        this.listDeviceFollowing = listDeviceFollowing._id;
+      } else if (this.role === "staff") {
+        const subProfileArray = await new ArrayId().save();
+        this.listSubProfile = subProfileArray._id;
+        const supProfileArray = await new ArrayId().save();
+        this.listSuperProfile = supProfileArray._id;
+        const listDevice = await new ArrayId().save();
+        this.listDevice = listDevice._id;
+      } else if (this.role === "admin") {
+        const subProfileArray = await new ArrayId().save();
+        this.listSubProfile = subProfileArray._id;
+      } else {
+        throw new Exception(
+          `Invalid role: ${this.role}`,
+          TAG,
+          "pre(validate)",
+          HTTPCode.BAD_REQUEST
+        );
+      }
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
 });
 
 profileSchema.statics.findByIdAndThrowIfNotFound = async function (
@@ -54,12 +93,12 @@ profileSchema.statics.findByIdAndThrowIfNotFound = async function (
   exceptionMessage,
   func
 ) {
-  logi(TAG, "findByIdAndThrowIfNotFound", `${id}`);
+  loge(TAG, "findByIdAndThrowIfNotFound", `${id}`);
   let result = await this.findById(id);
   if (!result) {
     throw new Exception(exceptionMessage + id, TAG, func, HTTPCode.BAD_REQUEST);
   }
-  logi(TAG, "findByIdAndThrowIfNotFound", result);
+  loge(TAG, "findByIdAndThrowIfNotFound", result);
   return result;
 };
 

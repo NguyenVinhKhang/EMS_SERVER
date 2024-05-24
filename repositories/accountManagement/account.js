@@ -1,3 +1,4 @@
+import { Schema } from "mongoose";
 import { tokenMap } from "../../authentication/tokenMap.js";
 import Exception, { handleException } from "../../exception/Exception.js";
 import HTTPCode from "../../exception/HTTPStatusCode.js";
@@ -76,17 +77,11 @@ const register = async ({ password, phoneNumber, staffPhoneNumber, name }) => {
       editedBy: newCustomerProfile._id,
     };
     await newAccount.save();
-
-    const customerListSuper = new ArrayId({
-      ids: [],
-    });
-    await customerListSuper.save();
-    newCustomerProfile.listSuperProfile = customerListSuper._id;
-    newCustomerProfile.accountId = newAccount._id;
     newCustomerProfile.lastModified = {
       editedBy: newCustomerProfile._id,
     };
     let staff;
+    newCustomerProfile.accountId = newAccount._id;
     await newCustomerProfile.save();
     if (staffPhoneNumber && staffPhoneNumber !== "") {
       staff = await Profile.findByPhoneNumber({
@@ -121,6 +116,7 @@ const putChangeAccountPassword = async ({
 }) => {
   try {
     logi(TAG, "putChangeAccountPassword", {
+      accountJWT,
       oldPassword,
       newPassword1,
       newPassword2,
@@ -139,7 +135,6 @@ const putChangeAccountPassword = async ({
         };
         await account.save();
         tokenMap.remove(token);
-        logi(TAG, "putChangeAccountPassword:", account);
       } else {
         throw new Exception(
           Exception.ACCOUNT_NEW_PASSWORD_NOT_MATCH,

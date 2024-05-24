@@ -10,6 +10,7 @@ router.put("/customerprofile/:id", UserManagementController.putCustomerProfile);
 router.put("/customeraccount/:id", UserManagementController.putCustomerAccount);
 router.post("/createcustomer", UserManagementController.postCreateNewCustomer);
 router.get("/liststaff", UserManagementController.getListStaff);
+router.get("/liststaff/:id", UserManagementController.getListStaffByCustomerId);
 router.get("/staffaccount/:id", UserManagementController.getStaffAccount);
 router.get("/staffprofile/:id", UserManagementController.getStaffProfile);
 router.put("/staffaccount/:id", UserManagementController.putStaffAccount);

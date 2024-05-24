@@ -36,6 +36,39 @@ const getListStaff = async (req, res) => {
   }
 };
 
+const getListStaffByCustomerId = async (req, res) => {
+  try {
+    let token = req?.token;
+    let accountJWT = await tokenMap.get(token);
+    const subProfileId = req?.params?.id;
+    let { searchString = "", page = 1, size = MAX_RECORDS } = req.body;
+
+    size = size >= MAX_RECORDS ? MAX_RECORDS : size;
+    logi(TAG, "getListStaffByCustomerId", {
+      accountJWT,
+      searchString,
+      page,
+      size,
+      subProfileId,
+    });
+    let result = await UserManagementRepository.getListStaffByCustomerId({
+      accountJWT,
+      searchString,
+      page,
+      size,
+      subProfileId,
+    });
+    res.status(HTTPCode.OK).json({
+      message: "Get staff list successfully",
+      data: result,
+    });
+  } catch (exception) {
+    res.status(HTTPCode.INTERNAL_SERVER_ERROR).json({
+      message: exception.message,
+    });
+  }
+};
+
 const getStaffAccount = async (req, res) => {
   try {
     let token = req?.token;
@@ -219,8 +252,7 @@ const putRemoveCustomerFromStaffSubId = async (req, res) => {
         staffProfileId,
       });
     res.status(HTTPCode.INSERT_OK).json({
-      message: "Remove customer from staff successfully",
-      data: result,
+      message: result,
     });
   } catch (exception) {
     res
@@ -251,8 +283,7 @@ const putAddCustomerToStaffSubId = async (req, res) => {
       listNewSubId,
     });
     res.status(HTTPCode.INSERT_OK).json({
-      message: "Add customer to staff successfully",
-      data: result,
+      message: result,
     });
   } catch (exception) {
     res
@@ -473,6 +504,7 @@ export default {
   getListStaff,
   getStaffAccount,
   getStaffProfile,
+  getListStaffByCustomerId,
   putStaffAccount,
   putStaffProfile,
   postCreateNewStaff,

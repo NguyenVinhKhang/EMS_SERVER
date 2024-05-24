@@ -13,11 +13,7 @@ export const actionRecord = new Schema({
 });
 
 actionRecord.pre("save", function (next) {
-  // Bỏ qua middleware nếu không phải là việc tạo mới tài liệu
-  if (!this.isNew) {
-    return next();
-  }
-  // Cập nhật thời gian chỉ khi tài liệu mới được tạo
+  // Cập nhật thời gian
   this.editedTime = new Date(new Date().getTime() + 7 * 60 * 60 * 1000); // Thêm 7 giờ vào thời gian mặc định
   next();
 });

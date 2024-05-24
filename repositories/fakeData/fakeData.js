@@ -4,7 +4,7 @@ import { logi, logw } from "../../helpers/log.js";
 import { faker } from "@faker-js/faker";
 import { Account, ArrayId, Profile } from "../../models/index.js";
 import bcrypt from "bcrypt";
-import Exception from "../../exception/Exception.js";
+import Exception, { handleException } from "../../exception/Exception.js";
 
 const TAG = "FAKE_DATA";
 
@@ -37,17 +37,11 @@ const createFakeAdmin = async () => {
     newAdminAccount.firstCreated = {
       editedBy: newAdminProfile._id,
     };
-    await newAdminAccount.save();
-    const listSubStaff = new ArrayId({
-      ids: [],
-    });
-    await listSubStaff.save();
-    newAdminProfile.listSubProfile = listSubStaff._id;
-
     newAdminProfile.lastModified = {
       editedBy: newAdminProfile._id,
     };
     await newAdminProfile.save();
+    await newAdminAccount.save();
     return newAdminProfile._id;
   } catch (exception) {
     await handleException(exception, "CREATE ADMIN", "createFakeAdmin");

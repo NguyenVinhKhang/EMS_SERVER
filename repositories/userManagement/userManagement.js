@@ -1,8 +1,9 @@
-import UserManagementHelper from "./userManagementHelper.js";
-import Exception from "../../exception/Exception.js";
+import UserManagementHelper from "./userManagementHelper/index.js";
+import Exception, { handleException } from "../../exception/Exception.js";
 import HTTPCode from "../../exception/HTTPStatusCode.js";
 import {
   checkAdminRight,
+  checkCustomerRight,
   checkStaffRight,
 } from "../../global/authorization.js";
 import { logi } from "../../helpers/log.js";
@@ -30,6 +31,57 @@ const getListStaff = async ({ accountJWT, searchString, page, size }) => {
     return result;
   } catch (exception) {
     await handleException(exception, TAG, "getListStaff");
+  }
+};
+
+const getListStaffByCustomerId = async ({
+  accountJWT,
+  searchString,
+  page,
+  size,
+  subProfileId,
+}) => {
+  try {
+    logi(TAG, "getListStaffByCustomerId", {
+      accountJWT,
+      searchString,
+      page,
+      size,
+      subProfileId,
+    });
+    await checkCustomerRight(accountJWT.role);
+    if (accountJWT.role === "staff") {
+      let staffProfile = await Profile.findWithId(accountJWT.role);
+      let staffSubList = await arrayId.findById(staffProfile.listSubProfile);
+      if (!staffSubList.includes(subProfileId)) {
+        throw new Exception(
+          Exception.ACCOUNT_ACCESS_DENIED,
+          TAG,
+          "getListStaffByCustomerId",
+          HTTPCode.BAD_REQUEST
+        );
+      }
+    }
+
+    if (accountJWT.role === "customer") {
+      if (!accountJWT.profileId.equals(ObjectId(subProfileId))) {
+        throw new Exception(
+          Exception.ACCOUNT_ACCESS_DENIED,
+          TAG,
+          "getListStaffByCustomerId",
+          HTTPCode.BAD_REQUEST
+        );
+      }
+    }
+    let result = await UserManagementHelper.getListSuper({
+      searchString,
+      page,
+      size,
+      subProfileId,
+    });
+    return result;
+  } catch (exception) {
+    await handleException(exception, TAG, "getListStaffByCustomerId");
   }
 };
 
@@ -382,6 +434,7 @@ export default {
   getCustomerList,
   getCustomerAccount,
   getCustomerProfile,
+  getListStaffByCustomerId,
   putCustomerAccount,
   putCustomerProfile,
   postCreateNewCustomer,
