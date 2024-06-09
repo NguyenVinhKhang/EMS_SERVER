@@ -46,6 +46,6 @@ const getSubProfile = async ({ profileId }) => {
   }
 };
 export default {
-    getSubAccount,
-    getSubProfile,
-  };
+  getSubAccount,
+  getSubProfile,
+};

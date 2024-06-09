@@ -27,6 +27,8 @@ class Exception extends Error {
   // Nhóm "profile"
   static PROFILE_CANNOT_FIND_ID = "Cannot find account with id: ";
   static PROFILE_DATA_NOT_EXIST = "Profile data does not exist ";
+  static PROFILE_CUSTOMER_NOT_EXIST = "Profile customer does not exist ";
+  static PROFILE_STAFF_NOT_EXIST = "Profile staff does not exist ";
   static PROFILE_STAFF_NOT_EXIST = "Staff profile does not exist with id: ";
   static PROFILE_CUSTOMER_NOT_EXIST =
     "Customer profile does not exist with id:";
@@ -37,11 +39,14 @@ class Exception extends Error {
   static DEVICE_NOT_FOUND_SERIAL = `Cannot find device with serial: `;
   static DEVICE_NOT_FOUND_ID = `Cannot find device with id: `;
   static DEVICE_EXIST = `Device already exists`;
+  static DEVICE_REQUEST_ALREADY_EXIST = `Device Serial already exists in the request pool`;
+  static REQUEST_DOES_NOT_EXIST = "Request dose not exist";
 
   //Nhóm khác
   static ABSTRACT_CLASS_CREATED =
     "Cannot construct abstract instances directly";
-  static INVALID_ARRAY = "Array in invalid";
+  static INVALID_ARRAY = "Array is invalid";
+
   constructor(message, tag, func, statusCode, validationErrors = {}) {
     super(message);
     loge(tag, func, message);

@@ -22,7 +22,7 @@ const checkSession = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -50,7 +50,7 @@ const login = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -70,7 +70,7 @@ const register = async (req, res) => {
     });
   } catch (exception) {
     res.status(exception.statusCode).json({
-      message: exception.message,
+      message: exception.message ? exception.message : exception,
     });
   }
 };
@@ -93,7 +93,7 @@ const logout = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -126,7 +126,7 @@ const putChangeAccountPassword = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -162,7 +162,7 @@ const putChangeAccountPhoneNumber = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };

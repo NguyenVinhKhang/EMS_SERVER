@@ -1,7 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { actionRecord } from "./actionRecord.js";
 import isEmail from "validator/lib/isEmail.js";
-import { ObjectId } from "mongodb";
 import HTTPCode from "../exception/HTTPStatusCode.js";
 import Exception from "../exception/Exception.js";
 import { loge, logi } from "../helpers/log.js";
@@ -93,12 +92,10 @@ profileSchema.statics.findByIdAndThrowIfNotFound = async function (
   exceptionMessage,
   func
 ) {
-  loge(TAG, "findByIdAndThrowIfNotFound", `${id}`);
   let result = await this.findById(id);
   if (!result) {
     throw new Exception(exceptionMessage + id, TAG, func, HTTPCode.BAD_REQUEST);
   }
-  loge(TAG, "findByIdAndThrowIfNotFound", result);
   return result;
 };
 

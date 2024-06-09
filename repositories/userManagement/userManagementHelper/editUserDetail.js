@@ -1,4 +1,4 @@
-import { logi } from "../../../helpers/log.js";
+import { logi, logw } from "../../../helpers/log.js";
 import bcrypt from "bcrypt";
 import { Account, Profile, ArrayId } from "../../../models/index.js";
 import { getShortProfile } from "../../profileManagement/profileHelper.js";
@@ -143,13 +143,13 @@ const putAddCustomerToStaffSubId = async ({
 
     // Find staff listSubProfile
     let staffListSubId = await ArrayId.findById(staffProfile.listSubProfile);
-
     let isModified = false;
     // add id to listSubProfile
     if (listNewSubId.length > 0) {
       for (const element of listNewSubId) {
         const elementId = ObjectId(element);
         const existCustomer = await Profile.findWithId(elementId);
+
         if (!staffListSubId.ids.some((id) => id.equals(elementId))) {
           // staff save new sub id
           staffListSubId.ids.push(elementId);
@@ -159,7 +159,6 @@ const putAddCustomerToStaffSubId = async ({
             existCustomer.listSuperProfile
           );
           listCustomerSuperProfile.ids.push(staffProfile._id);
-
           await staffListSubId.save();
           await listCustomerSuperProfile.save();
           existCustomer.lastModified = { editedBy: accountJWT.profileId };

@@ -31,7 +31,7 @@ export async function checkStaffRight(role) {
     throw new Exception(
       Exception.ACCOUNT_ACCESS_DENIED,
       "Authorization",
-      "checkAdminRight",
+      "checkStaffRight",
       HTTPCode.BAD_REQUEST
     );
   } else {
