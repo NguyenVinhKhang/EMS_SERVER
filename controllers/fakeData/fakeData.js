@@ -8,7 +8,7 @@ const generateFakeAccount = async (req, res) => {
     });
   } catch (exception) {
     res.status(HTTPCode.BAD_REQUEST).json({
-      message: exception.message,
+      message: exception.message ? exception.message : exception,
     });
   }
 };

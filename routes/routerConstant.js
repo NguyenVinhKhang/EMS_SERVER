@@ -3,6 +3,7 @@ import {
   fakeDataRoute,
   profileRouter,
   userManagementRoute,
+  deviceManagementRoute,
 } from "./index.js";
 
 export const guestURL = {
@@ -17,5 +18,6 @@ export const routers = [
   { path: "/ems/account", router: accountRouter },
   { path: "/ems/profile", router: profileRouter },
   { path: "/ems/usermanagement", router: userManagementRoute },
+  { path: "/ems/devicemanagement", router: deviceManagementRoute },
   { path: "/ems/fake", router: fakeDataRoute },
 ];

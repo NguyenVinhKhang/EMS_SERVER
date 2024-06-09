@@ -1,6 +1,4 @@
 import { ObjectId } from "mongodb";
-import Exception, { handleException } from "../../exception/Exception.js";
-import HTTPCode from "../../exception/HTTPStatusCode.js";
 import { logi } from "../../helpers/log.js";
 import { Profile } from "../../models/index.js";
 import { getShortProfile } from "./profileHelper.js";

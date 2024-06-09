@@ -14,6 +14,11 @@ export async function checkToken(req, res, next) {
   }
   try {
     const token = req.headers?.authorization.split(" ")[1];
+    if (!token || token === "") {
+      return res.status(HTTPCode.BAD_REQUEST).json({
+        message: "Token is required",
+      });
+    }
     const { iat, exp, ...jwtObject } = jwt.verify(
       token,
       process.env.JWT_SECRET

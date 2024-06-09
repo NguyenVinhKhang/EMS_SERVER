@@ -30,7 +30,7 @@ const putEditProfile = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -54,7 +54,7 @@ const getProfileData = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception,
+        message: exception.message ? exception.message : exception,
       });
   }
 };

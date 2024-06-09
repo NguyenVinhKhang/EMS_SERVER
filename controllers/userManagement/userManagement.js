@@ -31,7 +31,7 @@ const getListStaff = async (req, res) => {
     });
   } catch (exception) {
     res.status(HTTPCode.INTERNAL_SERVER_ERROR).json({
-      message: exception.message,
+      message: exception.message ? exception.message : exception,
     });
   }
 };
@@ -64,7 +64,7 @@ const getListStaffByCustomerId = async (req, res) => {
     });
   } catch (exception) {
     res.status(HTTPCode.INTERNAL_SERVER_ERROR).json({
-      message: exception.message,
+      message: exception.message ? exception.message : exception,
     });
   }
 };
@@ -94,7 +94,7 @@ const getStaffAccount = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -124,7 +124,7 @@ const getStaffProfile = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -159,7 +159,7 @@ const putStaffAccount = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -196,7 +196,7 @@ const putStaffProfile = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -230,7 +230,7 @@ const postCreateNewStaff = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -262,7 +262,7 @@ const putRemoveCustomerFromStaffSubId = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -293,7 +293,7 @@ const putAddCustomerToStaffSubId = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -329,7 +329,7 @@ const getCustomerList = async (req, res) => {
     });
   } catch (exception) {
     res.status(HTTPCode.INTERNAL_SERVER_ERROR).json({
-      message: exception.message,
+      message: exception.message ? exception.message : exception,
     });
   }
 };
@@ -359,7 +359,7 @@ const getCustomerAccount = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -389,7 +389,7 @@ const getCustomerProfile = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -424,7 +424,7 @@ const putCustomerAccount = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -461,7 +461,7 @@ const putCustomerProfile = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
@@ -495,7 +495,7 @@ const postCreateNewCustomer = async (req, res) => {
           : HTTPCode.INTERNAL_SERVER_ERROR
       )
       .json({
-        message: exception.message,
+        message: exception.message ? exception.message : exception,
       });
   }
 };
