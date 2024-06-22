@@ -54,7 +54,7 @@ const getListDeviceFollower = async ({
         { address: { $regex: new RegExp(searchString.trim(), "i") } },
       ];
     }
-    logi(TAG, "getListCustomerWithStaffId", matchConditions);
+    logi(TAG, "getListDeviceFollower", matchConditions);
 
     const profiles = await Profile.aggregate([
       { $match: matchConditions },
