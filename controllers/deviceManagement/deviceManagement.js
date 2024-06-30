@@ -24,7 +24,7 @@ const postCreateNewDevice = async (req, res) => {
       deviceManagerId,
     });
     const devices = await DeviceManagement.postCreateNewDevice({
-      creatorProfileId: accountJWT.profileId,
+      creatorProfile: accountJWT,
       deviceSerial: serial,
       deviceName,
       deviceAddress,

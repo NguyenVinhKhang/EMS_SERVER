@@ -171,18 +171,23 @@ const getDeviceDetail = async ({ accountJWT, deviceSerial }) => {
     });
     let result;
     const deviceExist = await Device.findBySerial(deviceSerial);
-
+    logw(TAG, "getDeviceDetail", deviceExist);
     const isStaff = accountJWT.role === "staff";
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
+      logw(TAG, "getDeviceDetail", {
+        owner: deviceExist.deviceOwner,
+        request: accountJWT.profileId,
+        test: !deviceExist.deviceOwner.equals(accountJWT.profileId),
+      });
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
         TAG,
-        "putRemoveCustomerFromDeviceFollowerList",
+        "getDeviceDetail",
         HTTPCode.BAD_REQUEST
       );
     }
@@ -212,8 +217,8 @@ const getListDeviceFollower = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -251,8 +256,8 @@ const putEditDeviceDetail = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -304,8 +309,8 @@ const putEditDevicePath = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -348,7 +353,7 @@ const putChangeDeviceOwner = async ({
 
     if (
       accountJWT.role === "staff" &&
-      deviceExist.deviceManager !== accountJWT.profileId
+      !deviceExist.deviceManager.equals(accountJWT.profileId)
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -445,8 +450,8 @@ const putRemoveCustomerFromDeviceFollowerList = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -488,8 +493,8 @@ const putAddCustomerToDeviceFlowerList = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -556,8 +561,8 @@ const getListRequestToDevice = async ({
     const isCustomer = accountJWT.role === "customer";
 
     if (
-      (isStaff && deviceExist.deviceManager !== accountJWT.profileId) ||
-      (isCustomer && deviceExist.deviceOwner !== accountJWT.profileId)
+      (isStaff && !deviceExist.deviceManager.equals(accountJWT.profileId)) ||
+      (isCustomer && !deviceExist.deviceOwner.equals(accountJWT.profileId))
     ) {
       throw new Exception(
         Exception.ACCOUNT_ACCESS_DENIED,
@@ -674,7 +679,7 @@ const putRemoveRequestFollowDevice = async ({ editorId, deviceSerial }) => {
 };
 
 const postCreateNewDevice = async ({
-  creatorProfileId,
+  creatorProfile,
   deviceSerial,
   deviceName,
   deviceAddress,
@@ -683,22 +688,34 @@ const postCreateNewDevice = async ({
 }) => {
   try {
     logi(TAG, "postCreateNewDevice", {
-      creatorProfileId,
+      creatorProfile,
       deviceSerial,
       deviceName,
       deviceAddress,
       deviceOwnerId,
       deviceManagerId,
     });
-
-    let result = await DeviceManagementHelper.postCreateNewDevice({
-      creatorProfileId,
-      deviceSerial,
-      deviceName,
-      deviceAddress,
-      deviceOwnerId,
-      deviceManagerId,
-    });
+    let result;
+    if (creatorProfile.role === "customer") {
+      result = await DeviceManagementHelper.postCreateNewDevice({
+        creatorProfileId: creatorProfile.profileId,
+        deviceSerial,
+        deviceName,
+        deviceAddress,
+        deviceOwnerId: creatorProfile.profileId,
+        deviceManagerId,
+      });
+    }
+    if (creatorProfile.role === "staff") {
+      result = await DeviceManagementHelper.postCreateNewDevice({
+        creatorProfileId: creatorProfile.profileId,
+        deviceSerial,
+        deviceName,
+        deviceAddress,
+        deviceOwnerId,
+        deviceManagerId: creatorProfile.profileId,
+      });
+    }
     return result;
   } catch (exception) {
     await handleException(exception, TAG, "postCreateNewDevice");
