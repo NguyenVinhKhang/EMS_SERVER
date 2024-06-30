@@ -10,14 +10,14 @@ const postCreateNewDevice = async (req, res) => {
     let token = req?.token;
     let accountJWT = await tokenMap.get(token);
     const {
-      deviceSerial,
+      serial,
       deviceName,
       deviceAddress,
       deviceOwnerId,
       deviceManagerId,
     } = req.body;
     logi(TAG, "postCreateNewDevice", {
-      deviceSerial,
+      serial,
       deviceName,
       deviceAddress,
       deviceOwnerId,
@@ -25,7 +25,7 @@ const postCreateNewDevice = async (req, res) => {
     });
     const devices = await DeviceManagement.postCreateNewDevice({
       creatorProfileId: accountJWT.profileId,
-      deviceSerial,
+      deviceSerial: serial,
       deviceName,
       deviceAddress,
       deviceOwnerId,
@@ -546,14 +546,14 @@ const postCreateRequestFollowDevice = async (req, res) => {
   try {
     let token = req?.token;
     let accountJWT = await tokenMap.get(token);
-    const { deviceSerial } = req.body;
+    const { serial } = req.body;
     logi(TAG, "putRemoveCustomerFromDeviceFollowerList", {
-      deviceSerial,
+      deviceSerial: serial,
       accountJWT,
     });
     const device = await DeviceManagement.postCreateRequestFollowDevice({
       accountJWT,
-      deviceSerial,
+      deviceSerial: serial,
     });
     res.status(HTTPCode.OK).json({
       message: device,
@@ -575,14 +575,14 @@ const putRemoveRequestFollowDevice = async (req, res) => {
   try {
     let token = req?.token;
     let accountJWT = await tokenMap.get(token);
-    const { deviceSerial } = req.body;
+    const { serial } = req.body;
     logi(TAG, "putRemoveCustomerFromDeviceFollowerList", {
-      deviceSerial,
+      deviceSerial: serial,
       accountJWT,
     });
     const result = await DeviceManagement.putRemoveRequestFollowDevice({
       editorId: accountJWT.profileId,
-      deviceSerial,
+      deviceSerial: serial,
     });
     res.status(HTTPCode.OK).json({
       message: result,

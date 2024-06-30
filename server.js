@@ -5,7 +5,6 @@ import connect from "./database/database.js";
 import { checkToken } from "./authentication/auth.js";
 import { loge, logi } from "./helpers/log.js";
 import { routers } from "./routes/routerConstant.js";
-import Exception from "./exception/Exception.js";
 import HTTPCode from "./exception/HTTPStatusCode.js";
 
 dotenv.config();
