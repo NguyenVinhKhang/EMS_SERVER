@@ -1,6 +1,6 @@
 import { handleException } from "../../../exception/Exception.js";
 import { logi } from "../../../helpers/log.js";
-import { Device, Profile } from "../../../models/index.js";
+import { ArrayId, Device, Profile } from "../../../models/index.js";
 import returnDeviceDetail from "./helper.js";
 import { ObjectId } from "mongodb";
 
@@ -36,9 +36,17 @@ const postCreateNewDevice = async ({
     }
     if (deviceOwnerId !== undefined && deviceName !== "") {
       newDevice.deviceOwner = ObjectId(deviceOwnerId);
+      let ownerProfile = await Profile.findWithId(deviceOwnerId);
+      let listDevice = await ArrayId.findOne(ownerProfile.listDevice);
+      listDevice.ids.push();
+      await listDevice.save();
     }
     if (deviceManagerId !== undefined && deviceManagerId !== "") {
       newDevice.deviceManager = ObjectId(deviceManagerId);
+      let managerProfile = await Profile.findWithId(deviceOwnerId);
+      let listDevice = await ArrayId.findOne(managerProfile.listDevice);
+      listDevice.ids.push();
+      await listDevice.save();
     }
     let creatorProfile = await Profile.findWithId(creatorProfileId);
     newDevice.firstCreated = {
@@ -48,6 +56,18 @@ const postCreateNewDevice = async ({
       editedBy: creatorProfile._id,
     };
     let createdDevice = await Device.create(newDevice);
+    if (deviceOwnerId !== undefined && deviceName !== "") {
+      let ownerProfile = await Profile.findWithId(deviceOwnerId);
+      let listDevice = await ArrayId.findOne(ownerProfile.listDevice);
+      listDevice.ids.push(createdDevice._id);
+      await listDevice.save();
+    }
+    if (deviceManagerId !== undefined && deviceManagerId !== "") {
+      let managerProfile = await Profile.findWithId(deviceOwnerId);
+      let listDevice = await ArrayId.findOne(managerProfile.listDevice);
+      listDevice.ids.push(createdDevice._id);
+      await listDevice.save();
+    }
     let returnDataDevice = await returnDeviceDetail(createdDevice);
     return returnDataDevice;
   } catch (exception) {
