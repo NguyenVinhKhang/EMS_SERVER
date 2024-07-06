@@ -716,6 +716,16 @@ const postCreateNewDevice = async ({
         deviceManagerId: creatorProfile.profileId,
       });
     }
+    if (creatorProfile.role === "admin") {
+      result = await DeviceManagementHelper.postCreateNewDevice({
+        creatorProfileId: creatorProfile.profileId,
+        deviceSerial,
+        deviceName,
+        deviceAddress,
+        deviceOwnerId,
+        deviceManagerId,
+      });
+    }
     return result;
   } catch (exception) {
     await handleException(exception, TAG, "postCreateNewDevice");
