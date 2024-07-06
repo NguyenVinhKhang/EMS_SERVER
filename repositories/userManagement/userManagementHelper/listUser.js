@@ -37,9 +37,7 @@ const getListCustomerWithStaffId = async ({
       } else {
         matchConditions._id = { $in: arrayIds };
       }
-    } else {
-      return { resultSize: 0, result: [] };
-    }
+    } 
 
     logi(TAG, "getListCustomerWithStaffId", matchConditions);
 
