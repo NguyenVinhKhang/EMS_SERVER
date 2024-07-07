@@ -48,7 +48,7 @@ requestPoolSchema.statics.createNewRequest = async function (
   });
   await newRequest.save();
 
-  return "Create request successfully";
+  return newRequest;
 };
 
 // Create and export the model

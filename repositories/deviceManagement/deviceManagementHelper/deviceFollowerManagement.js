@@ -8,6 +8,7 @@ import {
   RequestPool,
 } from "../../../models/index.js";
 import { ObjectId } from "mongodb";
+import { getShortProfile } from "../../profileManagement/profileHelper.js";
 
 const TAG = "DEVICE FOLLOWER MANAGEMENT";
 
@@ -31,7 +32,12 @@ const postCreateRequestFollowDevice = async ({ creatorId, deviceSerial }) => {
       );
     }
     let result = await RequestPool.createNewRequest(creatorId, deviceSerial);
-    return result;
+    let returnResult = { ...result._doc };
+    returnResult.firstCreated = await getShortProfile(
+      result.firstCreated.editedBy,
+      result.firstCreated.editedTime
+    );
+    return returnResult;
   } catch (exception) {
     await handleException(exception, TAG, "putAddCustomerToStaffSubId");
   }
