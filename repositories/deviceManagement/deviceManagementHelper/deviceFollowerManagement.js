@@ -17,6 +17,19 @@ const postCreateRequestFollowDevice = async ({ creatorId, deviceSerial }) => {
       creatorId,
       deviceSerial,
     });
+    let creatorProfile = await Profile.findById(creatorId);
+    let listCreatorListFollowingDevice = await ArrayId.findById(
+      creatorProfile.listDeviceFollowing
+    );
+    let deviceInfo = await Device.findBySerial(deviceSerial);
+    if (listCreatorListFollowingDevice.ids.includes(deviceInfo._id)) {
+      throw new Exception(
+        Exception.DEVICE_ALREADY_FOLLOWING,
+        TAG,
+        "postCreateRequestFollowDevice",
+        HTTPCode.BAD_REQUEST
+      );
+    }
     let result = await RequestPool.createNewRequest(creatorId, deviceSerial);
     return result;
   } catch (exception) {

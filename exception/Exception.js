@@ -40,6 +40,7 @@ class Exception extends Error {
   static DEVICE_NOT_FOUND_ID = `Cannot find device with id: `;
   static DEVICE_EXIST = `Device already exists`;
   static DEVICE_REQUEST_ALREADY_EXIST = `Device Serial already exists in the request pool`;
+  static DEVICE_ALREADY_FOLLOWING = `Device Serial already followed`;
   static REQUEST_DOES_NOT_EXIST = "Request dose not exist";
 
   //Nhóm khác
