@@ -13,6 +13,7 @@ const getListStaff = async (req, res) => {
     let { searchString = "", page = 1, size = MAX_RECORDS } = req.body;
 
     size = size >= MAX_RECORDS ? MAX_RECORDS : size;
+    size = parseInt(size, 10);
     logi(TAG, "getListStaff", {
       accountJWT,
       searchString,
@@ -307,7 +308,8 @@ const getCustomerList = async (req, res) => {
       page = 1,
       size = MAX_RECORDS,
       staffId,
-    } = req.body;
+    } = req.query;
+    size = parseInt(size, 10);
     let newSize = size >= MAX_RECORDS ? MAX_RECORDS : size;
     logi(TAG, "getCustomerList", {
       accountJWT,

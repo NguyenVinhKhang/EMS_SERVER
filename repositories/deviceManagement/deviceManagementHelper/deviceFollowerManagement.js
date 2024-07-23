@@ -172,6 +172,7 @@ const putResponseRequestToDevice = async ({
       logw(TAG, "putResponseRequestToDevice", ress);
     }
     requestPool.status = status;
+    await requestPool.save()
     return requestPool;
   } catch (exception) {
     await handleException(exception, TAG, "putResponseRequestToDevice");

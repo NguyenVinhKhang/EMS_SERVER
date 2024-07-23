@@ -53,7 +53,8 @@ const getListAllDevice = async (req, res) => {
   try {
     let token = req?.token;
     let accountJWT = await tokenMap.get(token);
-    const { searchString, page, size } = req.body;
+    const { searchString, page, size } = req.query;
+    size = parseInt(size, 10);
     logi(TAG, "getListAllDevice", { searchString, page, size });
     const devices = await DeviceManagement.getListAllDevice({
       accountJWT,
@@ -82,7 +83,8 @@ const getOwnListDevice = async (req, res) => {
   try {
     let token = req?.token;
     let accountJWT = await tokenMap.get(token);
-    const { searchString, page, size } = req.body;
+    const { searchString, page, size } = req.query;
+    size = parseInt(size, 10);
     logi(TAG, "getOwnListDevice", { searchString, page, size });
     const devices = await DeviceManagement.getOwnListDevice({
       accountJWT,
